@@ -1,5 +1,5 @@
 # MultiCamRec: Multiple Camera Recorder
-This bash script is meant for simultaneous launching multiple instances of avconvto record video from multiple USB webcams. The video sources must be consecutive (Ex. /dev/video1, /dev/video2, and /dev/video). Each video is saved as cam_#.mp3 with the terminal output of avconv saved as cam_#.log. This script has been tested on Ubuntu 14.04.3 LTS. It requires avconv which is part of the libav-tools package.
+This bash script is meant for simultaneous launching multiple instances of avconvto record video from multiple USB webcams. The video sources must be consecutive (Ex. /dev/video1, /dev/video2, and /dev/video). Each video is saved as cam_#.mp4 with the terminal output of avconv saved as cam_#.log. This script has been tested on Ubuntu 14.04.3 LTS. It requires avconv which is part of the libav-tools package.
 
 Requirements:
 sudo apt-get install libav-tools
