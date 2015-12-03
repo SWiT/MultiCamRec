@@ -56,13 +56,16 @@ ENDCAM=$((STARTCAM+NUMCAM))
 for i in $(seq $STARTCAM $ENDCAM)
 do
 	echo "/dev/video$i"
-    avconv -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -i /dev/video$i -c:v copy -t $DURATION -y cam_$i.mp4 2>&1 &> cam_$i.log &
+    if [ $CODEC = "h264" ]
+    then
+        avconv -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -i /dev/video$i -vcodec libx264 -preset ultrafast -threads 0 -t $DURATION -y cam_$i.mp4 2>&1 &> cam_$i.log &
+    else
+        avconv -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -i /dev/video$i -c:v copy -t $DURATION -y cam_$i.mp4 2>&1 &> cam_$i.log &
+    fi
 
-    # TODO: abstract the command, start log files with the command, and implement the h264 option.
+    # TODO: abstract the command, start the log files with a copy of the command.
 	#COMMAND="avconv -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -i /dev/video$i -c:v copy -t $DURATION -y cam_$i.mp4 2>&1 &> cam_$i.log"
     #echo $COMMAND
-	# Use h264 to shrink output filesize.
-	#avconv -f video4linux2 -input_format mjpeg -video_size 1280x720 -i /dev/video0 -vcodec libx264 -preset ultrafast -threads 0 -t 60 -y cam_0.mp4 2>&1 &> cam_0.log &
 done
 
 

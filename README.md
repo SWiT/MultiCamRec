@@ -17,7 +17,7 @@ Options:
 -s | --startcam [#]         The video index number of the first camera (ex. 2 for /dev/video2)
 -n | --numcam [#]           The number of cameras to record from.
 -t | --time [#]             The duration of the recordings in seconds.
--c | --codec [copy]         The codec of the output video files
+-c | --codec [copy|h264]    The codec of the output video files
 -r | --resolution [#x#]     The resolution of the cameras
 ```
 Default Options:
