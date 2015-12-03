@@ -6,7 +6,7 @@ sudo apt-get install libav-tools
 
 Example: Record 3 webcams starting with /dev/video1 for 60 seconds
 ```
-./record.sh -s 1 -n 3 -t 60
+./multicamrec.sh -s 1 -n 3 -t 60
 ```
 Usage:
 ```
