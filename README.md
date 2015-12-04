@@ -14,17 +14,20 @@ Usage:
 ```
 Options:
 ```
--s | --startcam [#]         The video index number of the first camera (ex. 2 for /dev/video2)
--n | --numcam [#]           The number of cameras to record from.
--t | --time [#]             The duration of the recordings in seconds.
--c | --codec [copy|h264]    The codec of the output video files
--r | --resolution [#x#]     The resolution of the cameras
+-s | --startcam [#]     id number of the first camera (ex. 2 for /dev/video2)
+-n | --numcam [#]       number of cameras to record from
+-t | --time [#]         duration of the recordings in seconds
+-r | --resolution [#x#]     resolution of the cameras
+-fps | --framespersecond    limit the frames per second of the cameras
+-if | --inputformat [raw|mjpeg]     format of the input cameras
+-of | --outputformat [copy|h264]    format of the output video files
 ```
 Default Options:
 ```
-startcam    0
-numcam      1
-time        15
-codec       copy
-resolution  1280x720
+startcam        0
+numcam          1
+time            15
+inputformat     mjpeg
+outputformat    copy
+resolution      1280x720
 ```

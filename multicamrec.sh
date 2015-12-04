@@ -28,8 +28,16 @@ case $key in
     DURATION="$2"
     shift
     ;;
-    -c|--codec)
-    CODEC="$2"
+    -if|--inputformat)
+    INPUTFORMAT="$2"
+    shift
+    ;;
+    -of|--outputformat)
+    OUTPUTFORMAT="$2"
+    shift
+    ;;
+    -fps|--framespersecond)
+    FPS="$2"
     shift
     ;;    
     *)
@@ -46,7 +54,9 @@ STARTCAM=${STARTCAM-0}
 NUMCAM=${NUMCAM-1}
 RESOLUTION=${RESOLUTION-1280x720}
 DURATION=${DURATION-15}
-CODEC=${CODEC-copy}
+INPUTFORMAT=${INPUTFORMAT-mjpeg}
+OUTPUTFORMAT=${OUTPUTFORMAT-copy}
+FPS=${FPS-30}
 
 # Display help if requested.
 if [ $DISPLAYHELP = 1 ]
@@ -56,19 +66,22 @@ Usage:
 ./multicamrec.sh [OPTIONS]
 
 Options:
--s | --startcam [#]         The video index number of the first camera.
-                            (ex. 2 for /dev/video2)
--n | --numcam [#]           The number of cameras to record from.
--t | --time [#]             The duration of the recordings in seconds.
--c | --codec [copy|h264]    The codec of the output video files
--r | --resolution [#x#]     The resolution of the cameras
+-s | --startcam [#]     id number of the first camera (ex. 2 for /dev/video2)
+-n | --numcam [#]       number of cameras to record from
+-t | --time [#]         duration of the recordings in seconds
+-r | --resolution [#x#]     resolution of the cameras
+-fps | --framespersecond    limit the frames per second of the cameras
+-if | --inputformat [raw|mjpeg]     format of the input cameras
+-of | --outputformat [copy|h264]    format of the output video files
 
 Default Options:
-startcam    0
-numcam      1
-time        15
-codec       copy
-resolution  1280x720
+startcam        0
+numcam          1
+time            15
+resolution      1280x720
+fps             30
+inputformat     mjpeg
+outputformat    copy
 
 Example: Record 3 webcams starting with /dev/video1 for 60 seconds
 ./multicamrec.sh -s 1 -n 3 -t 60
@@ -79,7 +92,9 @@ fi
 # List the Cameras being used.
 echo -e "Number of Cameras: $NUMCAM"
 echo -e "Duration: $DURATION"
-echo -e "Output Codec: $CODEC"
+echo -e "Input FPS: $FPS"
+echo -e "Input Format: $INPUTFORMAT"
+echo -e "Output Format: $OUTPUTFORMAT"
 echo -e "Resolution: $RESOLUTION"
 
 
@@ -88,18 +103,39 @@ echo -e "Resolution: $RESOLUTION"
 ENDCAM=$((STARTCAM+NUMCAM))
 for i in $(seq $STARTCAM $ENDCAM)
 do
-    echo "/dev/video$i"    
-    COMMAND="avconv -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -i /dev/video$i"
-    if [ $CODEC = "h264" ]
+    echo "/dev/video$i"
+
+    # The command
+    COMMAND="avconv"
+
+    # The input
+    if [ $INPUTFORMAT = "raw" ]
     then
+        # Raw camera input. Warning: 1280x720x24x30/1000000 = 663Mbps. You can't get 30fps on a USB 2.0 camera. 21.7fps max in theory.
+        COMMAND="$COMMAND -f video4linux2 -s $RESOLUTION -r $FPS -i /dev/video$i"
+        EXTENSION="avi"
+    else
+        # MJPEG (default) it's the widest used compression
+        COMMAND="$COMMAND -f video4linux2 -input_format mjpeg -video_size $RESOLUTION -r $FPS -i /dev/video$i"
+        EXTENSION="mp4"
+    fi
+    
+    # The output
+    if [ $OUTPUTFORMAT = "h264" ]
+    then
+        # h264
         COMMAND="$COMMAND -vcodec libx264 -preset ultrafast -threads 0 -t $DURATION -y cam_$i.mp4"
     else
-        COMMAND="$COMMAND -c:v copy -t $DURATION -y cam_$i.mp4"
+        # copy (default)
+        COMMAND="$COMMAND -c:v copy -t $DURATION -y cam_$i.$EXTENSION"
     fi
-    echo -e "$COMMAND\n" > cam_$i.log
-    $COMMAND 2>&1 &>> cam_$i.log &    
-done
 
+    # Insert the command as the first line of the log file.
+    echo -e "$COMMAND\n" > cam_$i.log
+
+    # Launch the command, log the output, and detach process.
+    $COMMAND 2>&1 &>> cam_$i.log &
+done
 
 # Output Process IDs
 ps | grep -E "(PID|avconv)"
