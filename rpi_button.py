@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import datetime
 import subprocess
 
 GPIO.setwarnings(False) # This suppresses warning on repeat runs.
@@ -12,27 +13,60 @@ pin_LED = 24
 GPIO.setup(pin_button, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.setup(pin_LED, GPIO.OUT)  
 
-
-buttonstate = False
-GPIO.output(pin_LED, buttonstate)  
+running = False
+GPIO.output(pin_LED, running)  
 
 proc = None
 
-print("-------------");
+print("-------------")
 print("MultiCamRec")
-print("-------------");
+print("-------------")
+
+# Blink 10 times when script starts.
+for i in range(0,10):
+    GPIO.output(pin_LED, True)
+    time.sleep(0.2)
+    GPIO.output(pin_LED, False)
+    time.sleep(0.2)
+
+command = "avconv"
+command += " -f video4linux2"
+command += " -input_format mjpeg"
+command += " -video_size 1280x720"
+command += " -r 30"
+command += " -i /dev/video0"
+command += " -c:v copy"
+command += " -t 30"
+command += " -y"
+#command += " video0.mp4"
+
 while True:
-    input_state = GPIO.input(pin_button)
-    if input_state == False:
+    button_state = GPIO.input(pin_button)
+    if button_state == False:
         print('Button Pressed')
-        buttonstate = not buttonstate
-        GPIO.output(pin_LED, buttonstate)
+        if not running:
+            d = datetime.datetime.now();
+            filename = d.strftime("VID_%Y%m%d%H%M%S.mp4")
+            print command+" "+filename
+            proc = subprocess.Popen(command+" "+filename, shell=True)
+            running = True
+        else:
+            if proc != None:
+                proc.poll()
+                if (proc.returncode == None):
+                    print("Terminating process")
+                    proc.terminate()
+                print("returncode: %s"%proc.returncode)
+            else:
+                print("No process")
+            running = False
+        GPIO.output(pin_LED, running)
 
-        print(subprocess.check_output("ls -la", shell=True))
-        #proc = subprocess.Popen("multicamrec.sh", shell=True)
-
-    if proc != None:
+    if proc != None and running:
         proc.poll()
-        #print proc.returncode
-        
+        if (proc.returncode != None):
+            print("returncode: %s"%proc.returncode)
+            running = False
+            GPIO.output(pin_LED, running)
+            
     time.sleep(0.2)
