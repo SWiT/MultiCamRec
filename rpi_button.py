@@ -22,18 +22,18 @@ print("-------------")
 print("MultiCamRec")
 print("-------------")
 
-# Blink 10 times when script starts.
-for i in range(0,10):
+# Blink when the script starts.
+for i in range(0,60):
     GPIO.output(pin_LED, True)
-    time.sleep(0.2)
+    time.sleep(0.25)
     GPIO.output(pin_LED, False)
-    time.sleep(0.2)
+    time.sleep(0.25)
 print("Ready")
 
 command = "avconv"
 command += " -f video4linux2"
 command += " -input_format mjpeg"
-command += " -video_size 1920x1080"
+command += " -video_size 1280x720"
 command += " -r 30"
 command += " -i /dev/video0"
 command += " -c:v copy"
