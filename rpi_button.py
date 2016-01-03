@@ -32,7 +32,7 @@ print("-------------")
 print("CAMERA_%s"%cameraid)
 
 # Blink when the script starts.
-for i in range(0,10):
+for i in range(0,60):
     GPIO.output(pin_LED, True)
     time.sleep(0.25)
     GPIO.output(pin_LED, False)
