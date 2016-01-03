@@ -2,11 +2,11 @@ import RPi.GPIO as GPIO
 import time
 import datetime
 import subprocess
+import os
 
 GPIO.setwarnings(False) # This suppresses warning on repeat runs.
 
 GPIO.setmode(GPIO.BCM)  # Set board mode to Broadcom
-
 pin_button = 23
 pin_LED = 24
 
@@ -18,9 +18,16 @@ GPIO.output(pin_LED, running)
 
 proc = None
 
+# Get the Camera ID.
+cameraid = -1
+for i in range(0,32):
+    if os.path.isfile('CAMERA_'+str(i))
+        cameraid = i
+
 print("-------------")
 print("MultiCamRec")
 print("-------------")
+print("CAMERA_%s"%cameraid)
 
 # Blink when the script starts.
 for i in range(0,60):
@@ -33,7 +40,7 @@ print("Ready")
 command = "avconv"
 command += " -f video4linux2"
 command += " -input_format mjpeg"
-command += " -video_size 1280x720"
+command += " -video_size 1920x1080"
 command += " -r 30"
 command += " -i /dev/video0"
 command += " -c:v copy"
