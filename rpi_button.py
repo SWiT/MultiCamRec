@@ -72,6 +72,7 @@ while True:
                 print("No process")
             running = False
         GPIO.output(pin_LED, running)
+        time.sleep(1.0)
 
     if proc != None and running:
         proc.poll()
