@@ -6,6 +6,8 @@ import os
 
 GPIO.setwarnings(False) # This suppresses warning on repeat runs.
 
+workingfolder = "/home/pi/MultiCamRec/"
+
 GPIO.setmode(GPIO.BCM)  # Set board mode to Broadcom
 pin_button = 23
 pin_LED = 24
@@ -21,7 +23,7 @@ proc = None
 # Get the Camera ID.
 cameraid = -1
 for i in range(0,8):
-    filename = "/home/pi/MultiCamRec/CAMERA_" + str(i)
+    filename = workingfolder + "CAMERA_" + str(i)
     if os.path.isfile(filename):
         cameraid = i
         break
@@ -48,7 +50,7 @@ command += " -i /dev/video0"
 command += " -c:v copy"
 command += " -t 60"
 command += " -y"
-command += " /home/pi/MultiCamRec/"
+command += " " + workingfolder
 #command += "video0.mp4"
 
 while True:
@@ -57,9 +59,11 @@ while True:
         print('Button Pressed')
         if not running:
             d = datetime.datetime.now();
-            filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid) + ".mp4")
-            print command+filename
-            proc = subprocess.Popen(command+filename, shell=True)
+            filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid))
+            outputfile = filename + ".mp4"
+            outputlog = " 2>&1 &>> " + workingfolder + filename + ".log"
+            print command+outputfile+outputlog
+            proc = subprocess.Popen(command+outputfile+outputlog, shell=True)
             running = True
         else:
             if proc != None:
