@@ -34,11 +34,16 @@ print("-------------")
 print("CAMERA_%s"%cameraid)
 
 # Blink when the script starts.
-for i in range(0,60):
+for i in range(0,3):
     GPIO.output(pin_LED, True)
     time.sleep(0.25)
     GPIO.output(pin_LED, False)
     time.sleep(0.25)
+    GPIO.output(pin_LED, True)
+    time.sleep(0.25)
+    GPIO.output(pin_LED, False)
+    time.sleep(0.25)
+    
 print("Ready")
 
 command = "avconv"
@@ -61,9 +66,14 @@ while True:
             d = datetime.datetime.now();
             filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid))
             outputfile = filename + ".mp4"
-            outputlog = " 2>&1 &>> " + workingfolder + filename + ".log"
-            print command+outputfile+outputlog
-            proc = subprocess.Popen(command+outputfile+outputlog, shell=True)
+            # Create the log file.
+            logfile = workingfolder + filename + ".log"
+            log = open(logfile, "a")
+            c = command + outputfile
+            log.write(c + '\n\n')
+            log.flush()
+            print c
+            proc = subprocess.Popen(c, shell=True, stdout=log, stderr=log)
             running = True
         else:
             if proc != None:
