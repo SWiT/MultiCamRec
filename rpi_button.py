@@ -27,7 +27,7 @@ cameraid = 0 # Default camera id
 cameramode = "PICTURE" # Default camera mode
 blinkdelay = 2 # Default startup blink time
 auto = 0 # Disable automatic button timer by default
-lastauto = time.time() # Time of the last automatic button press
+lastpress = 0 # Time of the last button press
 
 # Parse options and parameters.
 for index, arg in enumerate(sys.argv):
@@ -90,12 +90,13 @@ else:
 
 while True:
     button_state = GPIO.input(pin_button)
-    if auto > 0 and (time.time() - lastauto) >= auto:
-        lastauto = time.time()
+    if auto > 0 and lastpress > 0 and (time.time() - lastpress) >= auto:
+        lastpress = time.time()
         button_state = False
         
     if button_state == False:
         print('Button Pressed')
+        lastpress = time.time()
         if not running:
             d = datetime.datetime.now();
             filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid))
