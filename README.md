@@ -1,10 +1,10 @@
 # MultiCamRec: Multiple Camera Recorder
-The goal of this project is to simultaneously record from multiple USB cameras.
+The goal of this project is to simultaneously record video or pictures from multiple USB cameras.
 
 ## Python Script
 The Python script is meant for launching avconv simultaneously on multiple Raspberry Pi Zeros with a single button press. There is a status LED for each RPi0.  The LED blinks on startup for 30 seconds. After that a button press will launch avconv and turn on the status LED for as long as the process runs. A second button press while the process is still running should kill the process. I have found killing the process may lock up the camera and require a reboot.
 
-The output files are named "/home/pi/MultiCamRec/[DATETIME]_CAM[ID].mp4".
+The output files are named "/home/pi/Pictures/[DATETIME]_CAM[ID].jpg" or "/home/pi/Videos/[DATETIME]_CAM[ID].avi".
 
 Setup:
 ```
@@ -12,11 +12,18 @@ Setup:
 git clone https://github.com/SWiT/MultiCamRec.git
 cd MultiCamRec
 # Give the Camera a unique ID number to help organize the output files. 
-touch CAMERA_1
 crontab -e
-# Add the following line 
-@reboot python /home/pi/MultiCamRec/rpi_button.py
+# Add the following line. Replace [ID] with the camera id number.
+@reboot python /home/pi/MultiCamRec/rpi_button.py -p -d 30 -c [ID]
 sudo reboot
+```
+
+Options for rpi_button.py:
+```
+-c | --camera [#]    id number of the camera
+-d | --delay [#]     number of seconds to blink and delay
+-v | --video         record a video
+-p | --picture       record a picture
 ```
 
 Wiring:

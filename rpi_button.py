@@ -3,6 +3,7 @@ import time
 import datetime
 import subprocess
 import os
+import sys
 
 GPIO.setwarnings(False) # This suppresses warning on repeat runs.
 
@@ -22,27 +23,26 @@ GPIO.output(pin_LED, running)
 
 proc = None
 
-# Get the Camera ID.
-cameraid = -1
-for i in range(0,8):
-    filename = workingfolder + "CAMERA_" + str(i)
-    if os.path.isfile(filename):
-        cameraid = i
-        break
+cameraid = 0 # Default camera id
+cameramode = "PICTURE" # Default camera mode
+blinkdelay = 2 # Default startup blink time
 
-filename = workingfolder + "VIDEO"
-if os.path.isfile(filename):
-    cameramode = "VIDEO"
-else:
-    cameramode = "IMAGE"
-
-blinkdelay = 2
+# Parse options and parameters.
+for index, arg in enumerate(sys.argv):
+    if arg == "--camera" or arg == "-c":
+        cameraid = int(sys.argv[index+1])
+    elif arg == "--delay" or arg == "-d":
+        blinkdelay = int(sys.argv[index+1])
+    elif arg == "--video" or arg == "-v":
+        cameramode = "VIDEO"
+    elif arg == "--picture" or arg == "-p":
+        cameramode = "PICTURE"
 		
 print("-------------")
 print("MultiCamRec")
 print("-------------")
-print("CAMERA_%s"%cameraid)
-print("MODE_%s"%cameramode)
+print("CAMERA %s"%cameraid)
+print("%s MODE"%cameramode)
 
 # Blink when the script starts.
 for i in range(0, blinkdelay):
@@ -57,7 +57,7 @@ for i in range(0, blinkdelay):
     
 print("Ready")
 
-extension = ".mp4" if (cameramode == 'VIDEO') else ".jpg"
+extension = ".avi" if (cameramode == 'VIDEO') else ".jpg"
 
 # Video mode
 if cameramode == 'VIDEO':
@@ -122,4 +122,4 @@ while True:
             running = False
             GPIO.output(pin_LED, running)
             
-    time.sleep(0.2)
+    time.sleep(0.1)
