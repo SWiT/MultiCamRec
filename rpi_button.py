@@ -26,6 +26,8 @@ proc = None
 cameraid = 0 # Default camera id
 cameramode = "PICTURE" # Default camera mode
 blinkdelay = 2 # Default startup blink time
+auto = 0 # Disable automatic button timer by default
+lastauto = time.time() # Time of the last automatic button press
 
 # Parse options and parameters.
 for index, arg in enumerate(sys.argv):
@@ -33,6 +35,8 @@ for index, arg in enumerate(sys.argv):
         cameraid = int(sys.argv[index+1])
     elif arg == "--delay" or arg == "-d":
         blinkdelay = int(sys.argv[index+1])
+    elif arg == "--auto" or arg == "-a":
+        auto = int(sys.argv[index+1])
     elif arg == "--video" or arg == "-v":
         cameramode = "VIDEO"
     elif arg == "--picture" or arg == "-p":
@@ -43,6 +47,8 @@ print("MultiCamRec")
 print("-------------")
 print("CAMERA %s"%cameraid)
 print("%s MODE"%cameramode)
+if auto > 0:
+    print("AUTO TIMER %s"%auto)
 
 # Blink when the script starts.
 for i in range(0, blinkdelay):
@@ -77,13 +83,17 @@ else:
     command += " -f video4linux2"
     command += " -s 1920x1080"
     command += " -i /dev/video0"
-    command += " -ss 0:0:3"
+    command += " -ss 0:0:3" # Delay 3 seconds to allow the camera to reach full brightness.
     command += " -vframes 1"
     command += " -y"
     command += " " + picturefolder
 
 while True:
     button_state = GPIO.input(pin_button)
+    if auto > 0 and (time.time() - lastauto) >= auto:
+        lastauto = time.time()
+        button_state = False
+        
     if button_state == False:
         print('Button Pressed')
         if not running:

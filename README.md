@@ -22,6 +22,7 @@ Options for rpi_button.py:
 ```
 -c | --camera [#]    id number of the camera
 -d | --delay [#]     number of seconds to blink and delay
+-a | --auto [#]      number of seconds to wait between automatic button presses
 -v | --video         record a video
 -p | --picture       record a picture
 ```
