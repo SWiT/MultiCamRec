@@ -28,10 +28,17 @@ for i in range(0,8):
         cameraid = i
         break
 
+filename = workingfolder + "VIDEO"
+if os.path.isfile(filename):
+    cameramode = "VIDEO"
+else:
+    cameramode = "IMAGE"
+		
 print("-------------")
 print("MultiCamRec")
 print("-------------")
 print("CAMERA_%s"%cameraid)
+print("MODE_%s"%cameramode)
 
 # Blink when the script starts.
 for i in range(0,30):
@@ -46,17 +53,26 @@ for i in range(0,30):
     
 print("Ready")
 
+extension = ".mp4" if (cameramode == 'VIDEO') else ".jpg"
+
 command = "avconv"
 command += " -f video4linux2"
-command += " -input_format mjpeg"
-command += " -video_size 1920x1080"
-command += " -r 30"
+if cameramode == 'VIDEO':
+    command += " -input_format mjpeg"
+command += " -s 1920x1080"
+if cameramode == 'VIDEO':
+    command += " -r 30"
 command += " -i /dev/video0"
-command += " -c:v copy"
-command += " -t 29"
+if cameramode == 'VIDEO':
+    command += " -c:v copy"
+    command += " -t 29"
+else:
+    command += " -ss 0:0:3"
+    command += " -vframes 1"
 command += " -y"
 command += " " + workingfolder
-#command += "video0.mp4"
+#command += "video0"+extension
+
 
 while True:
     button_state = GPIO.input(pin_button)
@@ -65,7 +81,7 @@ while True:
         if not running:
             d = datetime.datetime.now();
             filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid))
-            outputfile = filename + ".mp4"
+            outputfile = filename + extension
             # Create the log file.
             logfile = workingfolder + filename + ".log"
             log = open(logfile, "a")
