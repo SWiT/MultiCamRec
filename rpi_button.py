@@ -7,6 +7,8 @@ import os
 GPIO.setwarnings(False) # This suppresses warning on repeat runs.
 
 workingfolder = "/home/pi/MultiCamRec/"
+picturefolder = "/home/pi/Pictures/"
+videofolder = "/home/pi/Videos/"
 
 GPIO.setmode(GPIO.BCM)  # Set board mode to Broadcom
 pin_button = 23
@@ -33,6 +35,8 @@ if os.path.isfile(filename):
     cameramode = "VIDEO"
 else:
     cameramode = "IMAGE"
+
+blinkdelay = 2
 		
 print("-------------")
 print("MultiCamRec")
@@ -41,7 +45,7 @@ print("CAMERA_%s"%cameraid)
 print("MODE_%s"%cameramode)
 
 # Blink when the script starts.
-for i in range(0,30):
+for i in range(0, blinkdelay):
     GPIO.output(pin_LED, True)
     time.sleep(0.25)
     GPIO.output(pin_LED, False)
@@ -55,24 +59,28 @@ print("Ready")
 
 extension = ".mp4" if (cameramode == 'VIDEO') else ".jpg"
 
-command = "avconv"
-command += " -f video4linux2"
+# Video mode
 if cameramode == 'VIDEO':
+    command = "avconv"
+    command += " -f video4linux2"
     command += " -input_format mjpeg"
-command += " -s 1920x1080"
-if cameramode == 'VIDEO':
+    command += " -s 1920x1080"
     command += " -r 30"
-command += " -i /dev/video0"
-if cameramode == 'VIDEO':
+    command += " -i /dev/video0"
     command += " -c:v copy"
     command += " -t 29"
+    command += " -y"
+    command += " " + videofolder
+# Picture mode    
 else:
+    command = "avconv"
+    command += " -f video4linux2"
+    command += " -s 1920x1080"
+    command += " -i /dev/video0"
     command += " -ss 0:0:3"
     command += " -vframes 1"
-command += " -y"
-command += " " + workingfolder
-#command += "video0"+extension
-
+    command += " -y"
+    command += " " + picturefolder
 
 while True:
     button_state = GPIO.input(pin_button)
@@ -83,7 +91,10 @@ while True:
             filename = d.strftime("%Y%m%d%H%M%S_CAM" + str(cameraid))
             outputfile = filename + extension
             # Create the log file.
-            logfile = workingfolder + filename + ".log"
+            if cameramode == 'VIDEO':
+                logfile = videofolder + filename + ".log"
+            else:
+                logfile = picturefolder + filename + ".log"
             log = open(logfile, "a")
             c = command + outputfile
             log.write(c + '\n\n')
